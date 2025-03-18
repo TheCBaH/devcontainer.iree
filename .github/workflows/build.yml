@@ -1,0 +1,105 @@
+name: build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: 30 3 * * SAT
+
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    outputs:
+      id: ${{ steps.cache-id.outputs.id }}
+    steps:
+    - name: checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: false
+    - name: cache
+      id: cache-id
+      run: |
+        set -eux
+        iree_commit=$(git ls-tree HEAD iree|awk '{print $3}')
+        echo "id=submodule-$iree_commit" >> $GITHUB_OUTPUT
+    - name: Cache source
+      id: submodules
+      uses: actions/cache@v4
+      with:
+        path: .git/modules
+        key: ${{ steps.cache-id.outputs.id }}
+    - name: submodule
+      run: |
+        make submodule
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [source]
+    steps:
+    - name: checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: false
+    - uses: actions/cache/restore@v4
+      id: submodules
+      with:
+        path: .git/modules
+        key: ${{ needs.source.outputs.id }}
+    - name: submodule
+      run: |
+        make submodule
+    - name: cache
+      run: |
+        set -eux
+        ${{ env.EXEC }} df -h
+        df -h
+        mkdir .cache
+        if [ "$(stat --format %d /mnt)" != "$(stat --format %d .)" ]; then
+          df -h /mnt
+          sudo mkdir /mnt/.cache
+          sudo chown ${USER} /mnt/.cache
+          sudo mount --bind /mnt/.cache .cache
+        fi
+    - name: devcontainer
+      uses: ./.github/workflows/actions/devcontainer
+      id: devcontainer
+    - name: setup
+      run: |
+        echo 'EXEC=${{ steps.devcontainer.outputs.exec }}' >> $GITHUB_ENV
+    - name: configure
+      run: |
+        ${{ env.EXEC }} make configure WITH_CLANG=
+    - name: cache ID
+      id: cache-id
+      run: |
+        iree_commit=$(git -C iree log -n 1 --format=%h)
+        echo "id=${{ hashFiles( 'iree/WORKSPACE', 'iree/.bazel*', 'iree/*.bazelrc') }}" >> $GITHUB_OUTPUT
+        echo "id1=$iree_commit" >> $GITHUB_OUTPUT
+        echo "id2=${{ hashFiles( 'Makefile', '.github/workflows/build.yml' ) }}" >> $GITHUB_OUTPUT
+    - name: Cache Bazel repo
+      id: bazel-repo
+      uses: actions/cache@v4
+      with:
+        path: .cache/bazel-repo
+        key: bazel-repo-${{ steps.cache-id.outputs.id }}
+    - name: Cache Bazel build
+      id: bazel-cache
+      uses: actions/cache@v4
+      with:
+        path: .cache/bazel-build
+        key: bazel-build-${{ steps.cache-id.outputs.id }}-${{ steps.cache-id.outputs.id1}}-${{ steps.cache-id.outputs.id2}}
+        restore-keys: |
+          bazel-build-${{ steps.cache-id.outputs.id }}-${{ steps.cache-id.outputs.id1}}
+          bazel-build-${{ steps.cache-id.outputs.id }}
+    - name: fetch
+      run: |
+        ${{ env.EXEC }} make fetch
+    - name: build
+      run: |
+        ${{ env.EXEC }} make build
+    - name: disk space
+      run: |
+        ${{ env.EXEC }} df -h
+        df -h
+        du -sh .cache/*

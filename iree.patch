@@ -1,0 +1,35 @@
+diff --git a/compiler/src/iree/compiler/Codegen/Utils/BUILD.bazel b/compiler/src/iree/compiler/Codegen/Utils/BUILD.bazel
+index cf634dc8fa..ba645813c2 100644
+--- a/compiler/src/iree/compiler/Codegen/Utils/BUILD.bazel
++++ b/compiler/src/iree/compiler/Codegen/Utils/BUILD.bazel
+@@ -64,6 +64,7 @@ iree_compiler_cc_library(
+         "@llvm-project//mlir:SCFDialect",
+         "@llvm-project//mlir:SCFTransforms",
+         "@llvm-project//mlir:SideEffectInterfaces",
++        "@llvm-project//mlir:SubsetOpInterface",
+         "@llvm-project//mlir:Support",
+         "@llvm-project//mlir:TensorDialect",
+         "@llvm-project//mlir:TilingInterface",
+diff --git a/compiler/src/iree/compiler/Dialect/TensorExt/IR/BUILD.bazel b/compiler/src/iree/compiler/Dialect/TensorExt/IR/BUILD.bazel
+index 436a2f2455..70e01af6d7 100644
+--- a/compiler/src/iree/compiler/Dialect/TensorExt/IR/BUILD.bazel
++++ b/compiler/src/iree/compiler/Dialect/TensorExt/IR/BUILD.bazel
+@@ -57,6 +57,7 @@ iree_compiler_cc_library(
+         "@llvm-project//mlir:IR",
+         "@llvm-project//mlir:InferTypeOpInterface",
+         "@llvm-project//mlir:InliningUtils",
++        "@llvm-project//mlir:Support",
+         "@llvm-project//mlir:TensorDialect",
+     ],
+ )
+diff --git a/compiler/src/iree/compiler/Dialect/TensorExt/Transforms/BUILD.bazel b/compiler/src/iree/compiler/Dialect/TensorExt/Transforms/BUILD.bazel
+index d2aec7b3d9..a351ae98ad 100644
+--- a/compiler/src/iree/compiler/Dialect/TensorExt/Transforms/BUILD.bazel
++++ b/compiler/src/iree/compiler/Dialect/TensorExt/Transforms/BUILD.bazel
+@@ -27,5 +27,6 @@ iree_compiler_cc_library(
+         "@llvm-project//mlir:AffineDialect",
+         "@llvm-project//mlir:AffineUtils",
+         "@llvm-project//mlir:TensorDialect",
++        "@llvm-project//mlir:TransformUtils",
+     ],
+ )

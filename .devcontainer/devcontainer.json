@@ -1,0 +1,20 @@
+// For format details, see https://aka.ms/devcontainer.json.
+{
+    "name": "IREE devcontainer",
+    "build":  {
+        "dockerfile": "Dockerfile"
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils:2": {
+            "username": "vscode",
+            "upgradePackages": "false"
+        },
+        "./features/apt-packages": {
+            "packages": "build-essential clang gdb lld python3 valgrind zlib1g-dev"
+        },
+        "./features/bazel": {
+            "version": "7.3.1"
+        }
+    },
+    "remoteUser": "vscode"
+}

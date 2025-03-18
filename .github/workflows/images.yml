@@ -1,0 +1,21 @@
+name: images
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  devcontainer:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+    - name: checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+    - name: image
+      uses: ./.github/workflows/actions/devcontainer
+      with:
+        password: ${{ secrets.GITHUB_TOKEN }}

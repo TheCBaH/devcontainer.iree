@@ -1,0 +1,13 @@
+{
+    "name": "Bazel",
+    "id": "bazel-install",
+    "version": "0.0.1",
+    "description": "Install bazel",
+    "options": {
+        "version": {
+            "type": "string",
+            "default": "",
+            "description": "bazel version to install. If not specified, the latest version will be installed."
+        }
+    }
+}

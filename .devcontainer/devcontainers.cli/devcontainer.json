@@ -1,0 +1,13 @@
+{
+    "name": "Devcontainer CLI",
+    "image": "mcr.microsoft.com/devcontainers/base:bullseye",
+    "features": {
+        "ghcr.io/devcontainers/features/node:1": {},
+        "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+            "enableNonRootDocker": "true",
+            "moby": "true"
+        }
+    },
+    "postCreateCommand": ". ${NVM_DIR}/nvm.sh && npm install -g @devcontainers/cli",
+    "waitFor": "postCreateCommand"
+}

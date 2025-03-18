@@ -1,0 +1,13 @@
+{
+    "name": "APT Packages",
+    "id": "apt-packages",
+    "version": "0.0.1",
+    "description": "Install apt packages",
+    "options": {
+        "packages": {
+            "type": "string",
+            "default": "",
+            "description": "packages to install"
+        }
+    }
+}
