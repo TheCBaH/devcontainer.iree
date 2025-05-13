@@ -7,7 +7,6 @@ iree/configure_bazel.py: submodule
 
 iree.configure: iree/configure_bazel.py
 	git -C iree checkout .
-	git -C iree apply < iree.patch
 	env $(if ${WITH_CLANG},CC=/usr/bin/clang CXX=/usr/bin/clang++,CC=/usr/bin/gcc CXX=/usr/bin/g++) python3 $^
 
 iree.patch:
