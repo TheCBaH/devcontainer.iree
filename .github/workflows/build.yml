@@ -25,7 +25,7 @@ jobs:
         echo "id=submodule-$iree_commit" >> $GITHUB_OUTPUT
     - name: Cache source
       id: submodules
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: .git/modules
         key: ${{ steps.cache-id.outputs.id }}
@@ -41,7 +41,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         submodules: false
-    - uses: actions/cache/restore@v4
+    - uses: actions/cache/restore@v5
       id: submodules
       with:
         path: .git/modules
@@ -79,13 +79,13 @@ jobs:
         echo "id2=${{ hashFiles( 'Makefile', '.github/workflows/build.yml' ) }}" >> $GITHUB_OUTPUT
     - name: Cache Bazel repo
       id: bazel-repo
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: .cache/bazel-repo
         key: bazel-repo-${{ steps.cache-id.outputs.id }}
     - name: Cache Bazel build
       id: bazel-cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: .cache/bazel-build
         key: bazel-build-${{ steps.cache-id.outputs.id }}-${{ steps.cache-id.outputs.id1}}-${{ steps.cache-id.outputs.id2}}
