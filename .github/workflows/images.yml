@@ -16,6 +16,25 @@ jobs:
       with:
         submodules: true
     - name: image
+      id: devcontainer
       uses: ./.github/workflows/actions/devcontainer
       with:
         password: ${{ secrets.GITHUB_TOKEN }}
+    - name: smoke test
+      run: ${{ steps.devcontainer.outputs.exec }} echo "hello world"
+  devcontainers-cli:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+    - name: checkout
+      uses: actions/checkout@v6
+    - name: image
+      id: devcontainer-cli
+      uses: ./.github/workflows/actions/devcontainer
+      with:
+        name: devcontainers-cli
+        config: .devcontainer/devcontainers.cli/devcontainer.json
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: smoke test
+      run: ${{ steps.devcontainer-cli.outputs.exec }} echo "hello world"
