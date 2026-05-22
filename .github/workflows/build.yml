@@ -6,6 +6,7 @@ on:
   workflow_dispatch:
   schedule:
     - cron: 30 3 * * SAT
+    - cron: 0 4 1 * *
 
 jobs:
   source:
@@ -77,6 +78,7 @@ jobs:
         echo "id=${{ hashFiles( 'iree/WORKSPACE', 'iree/.bazel*', 'iree/*.bazelrc') }}" >> $GITHUB_OUTPUT
         echo "id1=$iree_commit" >> $GITHUB_OUTPUT
         echo "id2=${{ hashFiles( 'Makefile', '.github/workflows/build.yml' ) }}" >> $GITHUB_OUTPUT
+        echo "month=$(date +%Y%m)" >> $GITHUB_OUTPUT
     - name: Cache Bazel repo
       id: bazel-repo
       uses: actions/cache@v5
@@ -88,9 +90,10 @@ jobs:
       uses: actions/cache@v5
       with:
         path: .cache/bazel-build
-        key: bazel-build-${{ steps.cache-id.outputs.id }}-${{ steps.cache-id.outputs.id1}}-${{ steps.cache-id.outputs.id2}}
+        key: bazel-build-${{ steps.cache-id.outputs.id }}-${{ steps.cache-id.outputs.month }}-${{ steps.cache-id.outputs.id1}}-${{ steps.cache-id.outputs.id2}}
         restore-keys: |
-          bazel-build-${{ steps.cache-id.outputs.id }}-${{ steps.cache-id.outputs.id1}}
+          bazel-build-${{ steps.cache-id.outputs.id }}-${{ steps.cache-id.outputs.month }}-${{ steps.cache-id.outputs.id1}}
+          bazel-build-${{ steps.cache-id.outputs.id }}-${{ steps.cache-id.outputs.month }}
           bazel-build-${{ steps.cache-id.outputs.id }}
     - name: fetch
       run: |
@@ -103,3 +106,13 @@ jobs:
         ${{ env.EXEC }} df -h
         df -h
         du -sh .cache/*
+    - name: cache stats
+      if: always()
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh api repos/${{ github.repository }}/actions/caches --paginate \
+          --jq '.actions_caches[] | [.key, (.size_in_bytes/1048576|floor|tostring)+" MiB"] | @tsv' \
+          | sort
+        gh api repos/${{ github.repository }}/actions/caches \
+          --jq '"Total: \(.total_count) caches, \(([.actions_caches[].size_in_bytes]|add//0)/1048576|floor) MiB"'
