@@ -97,15 +97,28 @@ jobs:
           bazel-build-${{ steps.cache-id.outputs.id }}
     - name: fetch
       run: |
-        ${{ env.EXEC }} make fetch
+        set -o pipefail
+        ${{ env.EXEC }} make fetch 2>&1 | tee /tmp/fetch.log
     - name: build
       run: |
-        ${{ env.EXEC }} make build
+        set -o pipefail
+        ${{ env.EXEC }} make build 2>&1 | tee /tmp/build.log
     - name: disk space
       run: |
         ${{ env.EXEC }} df -h
         df -h
         du -sh .cache/*
+    - name: build stats
+      if: always()
+      run: |
+        echo "=== GitHub Actions cache ==="
+        echo "submodules:  ${{ steps.submodules.outputs.cache-hit || 'miss' }}"
+        echo "bazel-repo:  ${{ steps.bazel-repo.outputs.cache-hit || 'miss' }}"
+        echo "bazel-build: ${{ steps.bazel-cache.outputs.cache-hit || 'miss' }}"
+        echo "=== Bazel fetch ==="
+        grep -E 'INFO: (All external|[0-9]+ processes|Elapsed time)' /tmp/fetch.log 2>/dev/null || echo "(no data)"
+        echo "=== Bazel build ==="
+        grep -E 'INFO: (Build completed|[0-9]+ processes|Elapsed time)' /tmp/build.log 2>/dev/null || echo "(no data)"
     - name: cache stats
       if: always()
       env:
