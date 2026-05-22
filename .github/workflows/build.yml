@@ -87,14 +87,13 @@ jobs:
         key: bazel-repo-${{ steps.cache-id.outputs.id }}
     - name: Cache Bazel build
       id: bazel-cache
-      uses: actions/cache@v5
+      uses: actions/cache/restore@v5
       with:
         path: .cache/bazel-build
         key: bazel-build-${{ steps.cache-id.outputs.id }}-${{ steps.cache-id.outputs.month }}-${{ steps.cache-id.outputs.id1}}-${{ steps.cache-id.outputs.id2}}
         restore-keys: |
           bazel-build-${{ steps.cache-id.outputs.id }}-${{ steps.cache-id.outputs.month }}-${{ steps.cache-id.outputs.id1}}
           bazel-build-${{ steps.cache-id.outputs.id }}-${{ steps.cache-id.outputs.month }}
-          bazel-build-${{ steps.cache-id.outputs.id }}
     - name: fetch
       run: |
         set -o pipefail
@@ -103,6 +102,22 @@ jobs:
       run: |
         set -o pipefail
         ${{ env.EXEC }} make build 2>&1 | tee /tmp/build.log
+    - name: save build cache
+      if: steps.bazel-cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v5
+      with:
+        path: .cache/bazel-build
+        key: bazel-build-${{ steps.cache-id.outputs.id }}-${{ steps.cache-id.outputs.month }}-${{ steps.cache-id.outputs.id1}}-${{ steps.cache-id.outputs.id2}}
+    - name: prune old build caches
+      if: steps.bazel-cache.outputs.cache-hit != 'true'
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        prefix="bazel-build-${{ steps.cache-id.outputs.id }}-"
+        current="${prefix}${{ steps.cache-id.outputs.month }}"
+        gh api repos/${{ github.repository }}/actions/caches --paginate \
+          --jq ".actions_caches[] | select(.key | startswith(\"$prefix\")) | select(.key | startswith(\"$current\") | not) | .id" \
+          | xargs -r -I{} gh api --method DELETE repos/${{ github.repository }}/actions/caches/{}
     - name: disk space
       run: |
         ${{ env.EXEC }} df -h
