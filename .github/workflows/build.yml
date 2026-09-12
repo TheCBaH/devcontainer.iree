@@ -62,7 +62,7 @@ jobs:
           sudo mount --bind /mnt/.cache .cache
         fi
     - name: devcontainer
-      uses: ./.github/workflows/actions/devcontainer
+      uses: TheCBaH/devcontainer-action/devcontainer@v1
       id: devcontainer
     - name: setup
       run: |

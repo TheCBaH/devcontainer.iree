@@ -17,7 +17,7 @@ jobs:
         submodules: true
     - name: image
       id: devcontainer
-      uses: ./.github/workflows/actions/devcontainer
+      uses: TheCBaH/devcontainer-action/devcontainer@v1
       with:
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: smoke test
@@ -31,7 +31,7 @@ jobs:
       uses: actions/checkout@v7
     - name: image
       id: devcontainer-cli
-      uses: ./.github/workflows/actions/devcontainer
+      uses: TheCBaH/devcontainer-action/devcontainer@v1
       with:
         name: devcontainers-cli
         config: .devcontainer/devcontainers.cli/devcontainer.json
